@@ -9,21 +9,21 @@ from flask_sqlalchemy import SQLAlchemy
 app=Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD']= True
 app.config['SQLALCHEMY_DATABASE_URI']= 'mysql://root@localhost/shiyanlou'
-db = SQLALchemy(app)
+db = SQLAlchemy(app)
 
 class File(db.Model):
-    __tablename__ = 'flies'
+    __tablename__ = 'files'
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(80))
     created_time = db.Column(db.DateTime)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    category = db.relationship('Category')
+    category_id = db.Column(db.Integer, db.ForeignKey('categorys.id'))
+    categorys = db.relationship('Category')
     content = db.Column(db.Text)
 
-    def __init__ (self,title, created_time, category, content):
+    def __init__ (self,title, created_time, categorys, content):
         self.title = title
         self.created_time = created_time
-        self.cagegory = cagegory
+        self.categorys = categorys
         self.content = content
 
 class Category(db.Model):
@@ -31,13 +31,15 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key= True)
     name = db.Column(db.String(80))
     files = db.relationship('File')
+    def __init__ (self, name):
+        self.name = name
 
 '''
 file_path = '/home/shiyanlou/files/'
 file1 = 'helloshiyanlou.json'
 file2 = 'helloworld.json'
 '''
-def InserData():
+def InsertData():
     db.create_all()
     java = Category('Java')
     python = Category('Python')
@@ -49,7 +51,7 @@ def InserData():
     db.session.add(file2)
     db.session.commit()
 
-InsertData()
+#InsertData()
 
 @app.route('/')
 def index():
@@ -68,8 +70,10 @@ def index():
         return render_template('index.html',list2 = list2)
 '''
 
-@app.route('/files/<filename>')
-def file(filename):
+@app.route('/files/<file_id>')
+def file(file_id):
+    get_file = File.query.get(file_id)
+    return render_template('file.html',get_file = get_file)
     '''
     list1 = os.listdir(file_path)
     if filename+'.json' not in list1:
